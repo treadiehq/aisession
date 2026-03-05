@@ -1,0 +1,67 @@
+{
+  "name": "sessionsync",
+  "version": "0.1.0",
+  "description": "Multi-device continuity for Claude, Codex, Cursor, and OpenCode sessions — sync via iCloud, Dropbox, Google Drive, OneDrive, or any folder",
+  "author": "Dante Lex <dantelex2@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/dantelex/aisync#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dantelex/aisync"
+  },
+  "bugs": {
+    "url": "https://github.com/dantelex/aisync/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
+  "type": "module",
+  "bin": {
+    "ss": "./dist/cli.js"
+  },
+  "scripts": {
+    "dev": "tsx src/cli.ts",
+    "build": "tsc",
+    "prepublishOnly": "npm run build && npm test",
+    "test": "vitest run --config tests/vitest.config.ts",
+    "test:watch": "vitest --config tests/vitest.config.ts",
+    "lint": "tsc --noEmit",
+    "smoke": "bash scripts/smoke.sh"
+  },
+  "dependencies": {
+    "better-sqlite3": "^9.4.3",
+    "chokidar": "^3.6.0",
+    "commander": "^12.1.0",
+    "fastify": "^5.7.4",
+    "micromatch": "^4.0.7",
+    "pino": "^9.3.2",
+    "ps-list": "^9.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.11",
+    "@types/micromatch": "^4.0.9",
+    "@types/node": "^22.5.4",
+    "tsx": "^4.19.1",
+    "typescript": "^5.5.4",
+    "vitest": "^2.1.1"
+  },
+  "keywords": [
+    "ai",
+    "session",
+    "sync",
+    "claude",
+    "codex",
+    "cursor",
+    "opencode",
+    "continuity",
+    "multi-device",
+    "icloud",
+    "dropbox"
+  ]
+}

@@ -1,0 +1,26 @@
+# Build output
+dist/
+
+# Dependencies
+node_modules/
+
+# Local state (never commit user data)
+.sessionsync/
+*.db
+*.db-shm
+*.db-wal
+*.log
+
+# Temp files created by ss
+*.sstmp.*
+*.ssbundle
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
