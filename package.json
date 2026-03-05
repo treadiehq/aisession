@@ -1,5 +1,5 @@
 {
-  "name": "sessionsync",
+  "name": "aisync",
   "version": "0.1.0",
   "description": "Multi-device continuity for Claude, Codex, Cursor, and OpenCode sessions — sync via iCloud, Dropbox, Google Drive, OneDrive, or any folder",
   "author": "Dante Lex <dantelex2@gmail.com>",
@@ -22,7 +22,8 @@
   ],
   "type": "module",
   "bin": {
-    "ss": "./dist/cli.js"
+    "ss": "./dist/cli.js",
+    "aisync": "./dist/cli.js"
   },
   "scripts": {
     "dev": "tsx src/cli.ts",
