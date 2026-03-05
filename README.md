@@ -33,9 +33,7 @@ Paths are auto-detected on first run — no manual config required.
 ## Install
 
 ```bash
-npm install
-npm run build
-npm link
+npm install -g aisession # or npx aisession setup
 ```
 
 This installs `ss` globally via `npm link`.
