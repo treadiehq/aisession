@@ -1,6 +1,6 @@
 {
   "name": "aisession",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Multi-device continuity for Claude, Codex, Cursor, and OpenCode sessions — sync via iCloud, Dropbox, Google Drive, OneDrive, or any folder",
   "author": "Dante Lex <dantelex2@gmail.com>",
   "license": "MIT",
