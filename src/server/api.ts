@@ -1,7 +1,7 @@
 /**
  * Lightweight local session viewer API.
  *
- * ss server  →  http://localhost:3900
+ * ais server  →  http://localhost:3900
  *
  * Endpoints:
  *   GET /sessions

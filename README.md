@@ -32,17 +32,17 @@ Requires Node.js 18+.
 ## Get started
 
 ```bash
-ss setup        # choose your sync provider (iCloud, Dropbox, etc.)
-ss init         # initialize on this machine
-ss daemon:start # start syncing in the background
+ais setup        # choose your sync provider (iCloud, Dropbox, etc.)
+ais init         # initialize on this machine
+ais daemon:start # start syncing in the background
 ```
 
 On your other machine:
 
 ```bash
-ss setup        # same provider
-ss init
-ss daemon:start
+ais setup        # same provider
+ais init
+ais daemon:start
 ```
 
 That's it. Both machines are now in sync.
@@ -54,8 +54,8 @@ That's it. Both machines are now in sync.
 This is the killer feature. When you switch machines:
 
 ```bash
-ss sessions              # see your recent sessions
-ss handoff <sessionId>   # generate a continuation prompt
+ais sessions              # see your recent sessions
+ais handoff <sessionId>   # generate a continuation prompt
 ```
 
 You get something like this, ready to paste into Claude, Codex, or Cursor:

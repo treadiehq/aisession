@@ -89,7 +89,7 @@ function defaultSyncRoot(): string {
       'SessionSync',
     );
   }
-  // Generic fallback — user should run ss setup to pick a real provider
+  // Generic fallback — user should run ais setup to pick a real provider
   return path.join(os.homedir(), 'SessionSync');
 }
 
@@ -136,7 +136,7 @@ export function buildDefaultConfig(): Config {
 
 export function loadConfig(): Config {
   if (!fs.existsSync(CONFIG_PATH)) {
-    throw new Error(`Config not found. Run 'ss init' first.`);
+    throw new Error(`Config not found. Run 'ais init' first.`);
   }
   let raw = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8')) as Record<string, unknown>;
   raw = migrateIfNeeded(raw);

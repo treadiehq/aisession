@@ -37,40 +37,40 @@ Full reference for commands, config, sync behavior, security, and architecture.
 ## All Commands
 
 ```bash
-ss setup                          # Interactive provider selection
-ss init                           # Initialize config + DB
-ss config                         # Print resolved config
-ss set-sync --provider <name>     # Switch sync provider
-ss status                         # Show sync status
-ss doctor                         # Validate environment
-ss push                           # One-shot push to sync folder
-ss pull                           # One-shot pull from sync folder
-ss watch                          # Push on file changes (foreground)
-ss daemon:start                   # Start background daemon
-ss daemon:stop                    # Stop daemon
-ss daemon:status                  # Check daemon status
-ss sessions [--limit N]           # List recent sessions
-ss resume <id> [--turns N]        # Print LLM resume block
-ss handoff <id> [--format] [--turns N] [--include-git]
-ss timeline [--session <id>] [--limit N]
-ss replay <id> [--speed normal|fast] [--step]
-ss export <id> [--out <dir>]
-ss share <id> [--out <file>]
-ss server                         # Start local API at http://localhost:3900
-ss normalize                      # Normalize all sessions into unified model
-ss discover all                   # Show detected source paths + providers
-ss discover opencode              # Scan for OpenCode data
-ss lock <projectKey> [--source]   # Acquire sync lock
-ss unlock <projectKey> [--source] # Release sync lock
-ss cursor:restore <id> --to <dir> # Restore Cursor DB snapshot
-ss opencode:restore <id> --to <path> # Restore OpenCode DB snapshot
+ais setup                          # Interactive provider selection
+ais init                           # Initialize config + DB
+ais config                         # Print resolved config
+ais set-sync --provider <name>     # Switch sync provider
+ais status                         # Show sync status
+ais doctor                         # Validate environment
+ais push                           # One-shot push to sync folder
+ais pull                           # One-shot pull from sync folder
+ais watch                          # Push on file changes (foreground)
+ais daemon:start                   # Start background daemon
+ais daemon:stop                    # Stop daemon
+ais daemon:status                  # Check daemon status
+ais sessions [--limit N]           # List recent sessions
+ais resume <id> [--turns N]        # Print LLM resume block
+ais handoff <id> [--format] [--turns N] [--include-git]
+ais timeline [--session <id>] [--limit N]
+ais replay <id> [--speed normal|fast] [--step]
+ais export <id> [--out <dir>]
+ais share <id> [--out <file>]
+ais server                         # Start local API at http://localhost:3900
+ais normalize                      # Normalize all sessions into unified model
+ais discover all                   # Show detected source paths + providers
+ais discover opencode              # Scan for OpenCode data
+ais lock <projectKey> [--source]   # Acquire sync lock
+ais unlock <projectKey> [--source] # Release sync lock
+ais cursor:restore <id> --to <dir> # Restore Cursor DB snapshot
+ais opencode:restore <id> --to <path> # Restore OpenCode DB snapshot
 ```
 
 ---
 
 ## Provider Setup
 
-`ss setup` detects your OS and auto-finds available providers.
+`ais setup` detects your OS and auto-finds available providers.
 
 ### macOS
 
@@ -95,14 +95,14 @@ ss opencode:restore <id> --to <path> # Restore OpenCode DB snapshot
 Dropbox (`~/Dropbox`) is the most common native option. For anything else, use `custom`:
 
 ```bash
-ss setup --non-interactive --provider custom --path ~/Sync
+ais setup --non-interactive --provider custom --path ~/Sync
 ```
 
 Switch provider at any time:
 
 ```bash
-ss set-sync --provider dropbox
-ss set-sync --provider custom --path /mnt/gdrive
+ais set-sync --provider dropbox
+ais set-sync --provider custom --path /mnt/gdrive
 ```
 
 The sync folder layout inside the provider root:
@@ -120,11 +120,11 @@ SessionSync/
 Generate a paste-ready continuation prompt from any normalized session.
 
 ```bash
-ss handoff <sessionId>                     # Markdown (default)
-ss handoff <sessionId> --format text       # Plain text
-ss handoff <sessionId> --format json       # JSON (for scripting)
-ss handoff <sessionId> --turns 10          # Inspect last 10 turns (default: 6)
-ss handoff <sessionId> --include-git false # Skip git status
+ais handoff <sessionId>                     # Markdown (default)
+ais handoff <sessionId> --format text       # Plain text
+ais handoff <sessionId> --format json       # JSON (for scripting)
+ais handoff <sessionId> --turns 10          # Inspect last 10 turns (default: 6)
+ais handoff <sessionId> --include-git false # Skip git status
 ```
 
 The handoff block includes:
@@ -145,13 +145,13 @@ curl http://localhost:3900/sessions/<id>/handoff
 ## Session Timeline & Replay
 
 ```bash
-ss timeline                    # Global activity timeline
-ss timeline --session <id>     # Timeline for one session
-ss timeline --limit 50
+ais timeline                    # Global activity timeline
+ais timeline --session <id>     # Timeline for one session
+ais timeline --limit 50
 
-ss replay <id>                 # Step through turns interactively
-ss replay <id> --speed fast    # No pauses
-ss replay <id> --step          # Manual ENTER between steps
+ais replay <id>                 # Step through turns interactively
+ais replay <id> --speed fast    # No pauses
+ais replay <id> --step          # Manual ENTER between steps
 ```
 
 ---
@@ -159,11 +159,11 @@ ss replay <id> --step          # Manual ENTER between steps
 ## Export & Share
 
 ```bash
-ss export <id>                 # Export to ./session-export-<id>/
-ss export <id> --out ~/exports
+ais export <id>                 # Export to ./session-export-<id>/
+ais export <id> --out ~/exports
 
-ss share <id>                  # Bundle as session-<id>.ssbundle (tar.gz)
-ss share <id> --out ~/Desktop/session.ssbundle
+ais share <id>                  # Bundle as session-<id>.ssbundle (tar.gz)
+ais share <id> --out ~/Desktop/session.ssbundle
 ```
 
 Exported directory contains: `transcript.md`, `turns.json`, `timeline.json`, `metadata.json`, `patches/`.
@@ -173,7 +173,7 @@ Exported directory contains: `transcript.md`, `turns.json`, `timeline.json`, `me
 ## Local API Server
 
 ```bash
-ss server   # runs at http://localhost:3900
+ais server   # runs at http://localhost:3900
 ```
 
 Endpoints:
@@ -196,8 +196,8 @@ The server binds to `127.0.0.1` only and restricts CORS to localhost origins.
 Prevents two machines from pushing conflicting updates to the same project simultaneously.
 
 ```bash
-ss lock myproject --source claude    # Acquire lock (TTL: 10 min, auto-renewed by daemon)
-ss unlock myproject --source claude  # Release lock
+ais lock myproject --source claude    # Acquire lock (TTL: 10 min, auto-renewed by daemon)
+ais unlock myproject --source claude  # Release lock
 ```
 
 Locks are stored as JSON files in `<syncRoot>/locks/<source>/<projectKey>.lock.json`. If another machine holds a lock, push is skipped for those files (indexed locally, not lost).
@@ -215,8 +215,8 @@ Cursor and OpenCode SQLite DB files are **never pushed live**. Before any push, 
 To restore:
 
 ```bash
-ss cursor:restore <snapshotId> --to ~/Library/Application\ Support/Cursor/User/workspaceStorage/<hash>
-ss opencode:restore <snapshotId> --to ~/.opencode/sessions/mydb.sqlite
+ais cursor:restore <snapshotId> --to ~/Library/Application\ Support/Cursor/User/workspaceStorage/<hash>
+ais opencode:restore <snapshotId> --to ~/.opencode/sessions/mydb.sqlite
 ```
 
 Both commands refuse to run if the target app is still open.
@@ -226,7 +226,7 @@ Both commands refuse to run if the target app is still open.
 ## Doctor
 
 ```bash
-ss doctor
+ais doctor
 ```
 
 Checks and reports:
@@ -244,7 +244,7 @@ Returns exit code 1 if any critical check fails.
 
 ## Config Reference
 
-Located at `~/.sessionsync/config.json`. Created by `ss init`.
+Located at `~/.sessionsync/config.json`. Created by `ais init`.
 
 ```json
 {
@@ -295,7 +295,7 @@ Edit directly to add sources or change paths.
 |------|---------|
 | `~/.sessionsync/config.json` | User config (0600) |
 | `~/.sessionsync/index.db` | SQLite index — sources, files, sessions (0600) |
-| `~/.sessionsync/logs/ss.log` | JSON structured logs (pino) |
+| `~/.sessionsync/logs/ais.log` | JSON structured logs (pino) |
 | `~/.sessionsync/cache/machines/` | Pulled remote sessions |
 | `~/.sessionsync/snapshots/` | Local DB snapshots before push |
 | `~/.sessionsync/sessions/` | Normalized unified session model |

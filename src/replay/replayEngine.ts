@@ -25,7 +25,7 @@ export async function replaySession(rawSessionId: string, opts: ReplayOptions): 
   const meta = getNormalizedSession(rawSessionId);
   if (!meta) {
     consoleError(`Session not found in normalized store: ${rawSessionId}`);
-    consoleError(`Run 'ss normalize' or 'ss push' to index sessions first.`);
+    consoleError(`Run 'ais normalize' or 'ais push' to index sessions first.`);
     process.exit(1);
   }
 

@@ -5,7 +5,7 @@ import { LOG_DIR, LOG_PATH } from './paths.js';
 
 let _logger: pino.Logger | null = null;
 
-export function getLogger(name = 'ss'): pino.Logger {
+export function getLogger(name = 'ais'): pino.Logger {
   if (_logger) return _logger;
 
   fs.mkdirSync(LOG_DIR, { recursive: true });

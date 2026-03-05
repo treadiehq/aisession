@@ -29,7 +29,7 @@ function check(
 function canWrite(dirPath: string): boolean {
   try {
     fs.mkdirSync(dirPath, { recursive: true });
-    const tmp = path.join(dirPath, `.ss-doctor-${Date.now()}`);
+    const tmp = path.join(dirPath, `.ais-doctor-${Date.now()}`);
     fs.writeFileSync(tmp, '');
     fs.unlinkSync(tmp);
     return true;
@@ -172,7 +172,7 @@ export async function runDoctor(): Promise<boolean> {
 
   // Print results
   consoleLog('');
-  consoleLog('=== ss doctor ===');
+  consoleLog('=== ais doctor ===');
   consoleLog('');
 
   const icons: Record<string, string> = { ok: '✓', warn: '⚠', error: '✗' };

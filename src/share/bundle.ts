@@ -1,7 +1,7 @@
 /**
  * Session sharing: export + compress into a .ssbundle (tar.gz) archive.
  *
- * Usage: ss share <sessionId>
+ * Usage: ais share <sessionId>
  * Output: ./session-<id>.ssbundle
  *
  * Fully offline – no network required.
@@ -18,7 +18,7 @@ import { consoleLog, consoleError } from '../logger.js';
 export async function shareSession(rawSessionId: string, outFile?: string): Promise<string> {
   const meta = getNormalizedSession(rawSessionId);
   if (!meta) {
-    consoleError(`Session not found: ${rawSessionId}. Run 'ss normalize' first.`);
+    consoleError(`Session not found: ${rawSessionId}. Run 'ais normalize' first.`);
     process.exit(1);
   }
 
@@ -29,7 +29,7 @@ export async function shareSession(rawSessionId: string, outFile?: string): Prom
   const bundleFile = outFile ?? path.join(process.cwd(), `session-${shortId}.ssbundle`);
 
   // Export to a temp directory
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ss-share-'));
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ais-share-'));
   const exportDir = path.join(tmpDir, dirName);
 
   try {

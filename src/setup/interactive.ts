@@ -115,7 +115,7 @@ export async function runSetup(opts: SetupOptions = {}): Promise<void> {
   consoleLog(`Config saved to ${CONFIG_PATH}`);
   consoleLog('');
   consoleLog('Next steps:');
-  consoleLog('  ss init');
-  consoleLog('  ss daemon:start');
+  consoleLog('  ais init');
+  consoleLog('  ais daemon:start');
   consoleLog('');
 }

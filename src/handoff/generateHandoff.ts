@@ -57,7 +57,7 @@ export async function generateHandoff(
   const opts: HandoffOptions = { ...DEFAULT_OPTIONS, ...options };
   const meta = getNormalizedSession(rawSessionId);
   if (!meta) {
-    throw new Error(`Session not found: ${rawSessionId}. Run 'ss normalize' first.`);
+    throw new Error(`Session not found: ${rawSessionId}. Run 'ais normalize' first.`);
   }
 
   const timeline = readTimeline(meta.sessionId);

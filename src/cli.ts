@@ -51,9 +51,9 @@ const __dirname = path.dirname(__filename);
 const program = new Command();
 
 program
-  .name('ss')
+  .name('ais')
   .description('AI Session Sync – multi-device continuity for Claude, Codex, Cursor, OpenCode')
-  .version('0.1.0');
+  .version('0.1.2');
 
 // ── setup ─────────────────────────────────────────────────────────────────────
 program
@@ -104,7 +104,7 @@ program
     }
 
     consoleLog(`DB initialized at ${DB_PATH}`);
-    consoleLog('Done. Run `ss daemon:start` to begin syncing.');
+    consoleLog('Done. Run `ais daemon:start` to begin syncing.');
   });
 
 // ── config ───────────────────────────────────────────────────────────────────
@@ -119,7 +119,7 @@ program
 // ── set-sync ──────────────────────────────────────────────────────────────────
 program
   .command('set-sync')
-  .description('Update the sync provider and root folder (alias: ss config set-sync)')
+  .description('Update the sync provider and root folder (alias: ais config set-sync)')
   .requiredOption('--provider <name>', 'Provider: icloud | dropbox | googledrive | onedrive | custom')
   .option('--path <dir>', 'Custom folder path (required when provider=custom)')
   .action((opts) => {
@@ -252,7 +252,7 @@ program
     const sessions = listSessions(db, limit);
 
     if (sessions.length === 0) {
-      consoleLog('No sessions indexed. Run `ss push` first.');
+      consoleLog('No sessions indexed. Run `ais push` first.');
       return;
     }
 
@@ -480,7 +480,7 @@ program
     if (opts.session) {
       const entries = buildSessionTimeline(opts.session);
       if (entries.length === 0) {
-        consoleLog(`No timeline data for session ${opts.session}. Run 'ss normalize' first.`);
+        consoleLog(`No timeline data for session ${opts.session}. Run 'ais normalize' first.`);
         return;
       }
       consoleLog('');
@@ -491,7 +491,7 @@ program
 
     const entries = buildGlobalTimeline(limit);
     if (entries.length === 0) {
-      consoleLog('No timeline data. Run `ss normalize` to build session model.');
+      consoleLog('No timeline data. Run `ais normalize` to build session model.');
       return;
     }
     consoleLog('');

@@ -25,7 +25,7 @@ import { consoleError, consoleLog } from '../logger.js';
 export async function exportSession(rawSessionId: string, outDir?: string): Promise<string> {
   const meta = getNormalizedSession(rawSessionId);
   if (!meta) {
-    consoleError(`Session not found: ${rawSessionId}. Run 'ss normalize' first.`);
+    consoleError(`Session not found: ${rawSessionId}. Run 'ais normalize' first.`);
     process.exit(1);
   }
 
