@@ -29,7 +29,7 @@ export function detectClaude(
   }
 
   const kind = ext === '.jsonl' ? 'claude_jsonl' : 'claude_json';
-  const id = createHash('sha256').update('claude:' + absPath).digest('hex').slice(0, 20);
+  const id = createHash('sha256').update('claude:' + relPath).digest('hex').slice(0, 20);
   const project_hint = extractProjectHint(relPath);
 
   return [

@@ -34,7 +34,7 @@ export function detectCursor(
     return [];
   }
 
-  const id = createHash('sha256').update('cursor:' + absPath).digest('hex').slice(0, 20);
+  const id = createHash('sha256').update('cursor:' + relPath).digest('hex').slice(0, 20);
   const project_hint = extractProjectHint(relPath, absPath);
 
   return [

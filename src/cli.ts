@@ -53,7 +53,8 @@ const program = new Command();
 program
   .name('ais')
   .description('AI Session Sync – multi-device continuity for Claude, Codex, Cursor, OpenCode')
-  .version('0.1.2');
+  .version('0.1.3')
+  .option('--i-know-what-im-doing', 'Suppress the ~/.openai safety warning');
 
 // ── setup ─────────────────────────────────────────────────────────────────────
 program
@@ -180,7 +181,7 @@ program
   .description('Push local session files to iCloud sync root')
   .action(async () => {
     const cfg = loadConfig();
-    checkOpenAIWarning(cfg);
+    checkOpenAIWarning(cfg, !!program.opts().iKnowWhatImDoing);
     const db = getDb();
     await indexAll(cfg, db);
     const count = await push(cfg, db);
@@ -204,7 +205,7 @@ program
   .description('Watch for changes and push automatically')
   .action(async () => {
     const cfg = loadConfig();
-    checkOpenAIWarning(cfg);
+    checkOpenAIWarning(cfg, !!program.opts().iKnowWhatImDoing);
     const db = getDb();
 
     const watchPaths = cfg.include
@@ -378,16 +379,19 @@ program
     }
 
     const cfg = loadConfig();
-    checkOpenAIWarning(cfg);
+    const iKnow = !!program.opts().iKnowWhatImDoing;
+    checkOpenAIWarning(cfg, iKnow);
 
     if (opts.foreground) {
       consoleLog('Starting daemon in foreground...');
       await daemonLoop(cfg);
     } else {
-      // Fork a detached child
+      // Fork a detached child, forwarding the bypass flag if the parent had it
+      const childArgs = [__filename, 'daemon:start', '--foreground'];
+      if (iKnow) childArgs.push('--i-know-what-im-doing');
       const child = (await import('node:child_process')).spawn(
         process.execPath,
-        [__filename, 'daemon:start', '--foreground'],
+        childArgs,
         {
           detached: true,
           stdio: 'ignore',
@@ -567,7 +571,7 @@ program
   });
 
 // ── helpers ───────────────────────────────────────────────────────────────────
-function checkOpenAIWarning(cfg: ReturnType<typeof loadConfig>): void {
+function checkOpenAIWarning(cfg: ReturnType<typeof loadConfig>, bypass: boolean): void {
   const hasOpenAI = cfg.include.some((e) => isOpenAIPath(e.path));
   if (hasOpenAI) {
     consoleWarn('');
@@ -577,9 +581,7 @@ function checkOpenAIWarning(cfg: ReturnType<typeof loadConfig>): void {
     consoleWarn('!! Add --i-know-what-im-doing to suppress this warning.     !!');
     consoleWarn('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
     consoleWarn('');
-    // In a non-interactive path we exit unless the flag is present
-    const args = process.argv;
-    if (!args.includes('--i-know-what-im-doing')) {
+    if (!bypass) {
       consoleError('Aborting. Pass --i-know-what-im-doing to proceed with ~/.openai in sync config.');
       process.exit(1);
     }

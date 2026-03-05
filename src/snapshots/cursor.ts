@@ -25,6 +25,15 @@ export async function snapshotCursorDb(
 
     const destPath = path.join(dir, path.basename(absPath));
     await atomicCopy(absPath, destPath);
+
+    // Copy WAL and SHM sibling files to prevent SQLite corruption on restore
+    for (const suffix of ['-wal', '-shm']) {
+      const sibling = absPath + suffix;
+      if (fs.existsSync(sibling)) {
+        await atomicCopy(sibling, destPath + suffix);
+      }
+    }
+
     log.info({ source, absPath, snapshotId }, 'Created cursor snapshot');
     return { snapshotId, snapshotPath: destPath, source };
   } catch (err) {
@@ -55,7 +64,11 @@ export async function restoreCursorSnapshot(
   source = 'cursor',
 ): Promise<void> {
   const log = getLogger();
-  const dir = snapshotDir(source, snapshotId);
+  const sourceDir = path.join(SNAPSHOTS_DIR, source);
+  const dir = path.resolve(snapshotDir(source, snapshotId));
+  if (!dir.startsWith(path.resolve(sourceDir) + path.sep)) {
+    throw new Error(`Invalid snapshot ID: ${snapshotId}`);
+  }
   if (!fs.existsSync(dir)) {
     throw new Error(`Snapshot not found: ${snapshotId}`);
   }

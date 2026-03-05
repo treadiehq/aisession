@@ -6,10 +6,12 @@ import fs from 'node:fs';
  */
 export async function isProcessRunning(names: string[]): Promise<boolean> {
   try {
+    const myPid = process.pid;
     const psList = await import('ps-list');
     const list = await psList.default();
     const lowerNames = names.map((n) => n.toLowerCase());
     return list.some((proc) => {
+      if (proc.pid === myPid) return false;
       const procName = (proc.name ?? '').toLowerCase();
       const cmd = (proc.cmd ?? '').toLowerCase();
       return lowerNames.some((n) => procName.includes(n) || cmd.includes(n));

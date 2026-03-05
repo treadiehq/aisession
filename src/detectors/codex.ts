@@ -29,7 +29,7 @@ export function detectCodex(
   }
 
   const kind = ext === '.jsonl' ? 'codex_jsonl' : 'codex_json';
-  const id = createHash('sha256').update('codex:' + absPath).digest('hex').slice(0, 20);
+  const id = createHash('sha256').update('codex:' + relPath).digest('hex').slice(0, 20);
   const project_hint = extractProjectHint(relPath);
 
   return [

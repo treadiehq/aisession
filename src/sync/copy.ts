@@ -14,6 +14,8 @@ export async function atomicCopy(src: string, dest: string): Promise<void> {
   const tmp = dest + '.sstmp.' + Date.now();
   try {
     fs.copyFileSync(src, tmp);
+    const srcStat = fs.statSync(src);
+    fs.utimesSync(tmp, srcStat.atime, srcStat.mtime);
     fs.renameSync(tmp, dest);
     log.debug({ src, dest }, 'Copied file');
   } catch (err) {

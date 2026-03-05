@@ -58,7 +58,7 @@ async function _normalize(row: SessionRow, machineId: string): Promise<void> {
   };
   writeMetadata(meta);
 
-  const existingCount = countExistingTurns(row.id);
+  const existingCount = await countExistingTurns(row.id);
   const newTurns = await extractTurns(row, existingCount);
   appendTurns(row.id, newTurns);
 
@@ -100,7 +100,7 @@ async function extractTurns(row: SessionRow, skipCount: number): Promise<Normali
 async function extractJsonlTurns(row: SessionRow, skipCount: number): Promise<NormalizedTurn[]> {
   const turns: NormalizedTurn[] = [];
   let offset = 0;
-  let lineIndex = 0;
+  let skippedTurns = 0;
 
   const rl = readline.createInterface({
     input: fs.createReadStream(row.file_abs_path),
@@ -108,29 +108,33 @@ async function extractJsonlTurns(row: SessionRow, skipCount: number): Promise<No
   });
 
   for await (const line of rl) {
-    if (!line.trim()) { offset += line.length + 1; lineIndex++; continue; }
+    const byteLen = Buffer.byteLength(line, 'utf8') + 1;
 
-    if (lineIndex < skipCount) { offset += line.length + 1; lineIndex++; continue; }
+    if (!line.trim()) { offset += byteLen; continue; }
 
     try {
       const obj = JSON.parse(line) as Record<string, unknown>;
       const turn = parseTurnObject(obj, row.source, row.file_abs_path, offset);
-      if (turn) turns.push(turn);
+      if (turn) {
+        if (skippedTurns < skipCount) {
+          skippedTurns++;
+        } else {
+          turns.push(turn);
+        }
+      }
     } catch { /* skip bad lines */ }
 
-    offset += line.length + 1;
-    lineIndex++;
+    offset += byteLen;
   }
 
   return turns;
 }
 
 async function extractJsonTurns(row: SessionRow, skipCount: number): Promise<NormalizedTurn[]> {
-  if (skipCount > 0) return []; // already processed
   let raw: string;
   try {
     const stat = fs.statSync(row.file_abs_path);
-    if (stat.size > 10 * 1024 * 1024) return [makeMetaTurn(row)]; // >10MB skip
+    if (stat.size > 10 * 1024 * 1024) return skipCount === 0 ? [makeMetaTurn(row)] : [];
     raw = fs.readFileSync(row.file_abs_path, 'utf8');
   } catch { return []; }
 
@@ -138,9 +142,10 @@ async function extractJsonTurns(row: SessionRow, skipCount: number): Promise<Nor
   try { obj = JSON.parse(raw); } catch { return []; }
 
   const messages = extractMessagesArray(obj);
-  return messages
+  const allTurns = messages
     .map((m, i) => parseTurnObject(m, row.source, row.file_abs_path, i))
     .filter((t): t is NormalizedTurn => t !== null);
+  return allTurns.slice(skipCount);
 }
 
 async function extractLogTurns(row: SessionRow, skipCount: number): Promise<NormalizedTurn[]> {

@@ -16,7 +16,13 @@ type LockFile = {
 
 function readLock(lockPath: string): LockFile | null {
   try {
-    return JSON.parse(fs.readFileSync(lockPath, 'utf8')) as LockFile;
+    const lock = JSON.parse(fs.readFileSync(lockPath, 'utf8'));
+    if (
+      !lock ||
+      typeof lock.machineId !== 'string' ||
+      typeof lock.expiresAtMs !== 'number'
+    ) return null;
+    return lock as LockFile;
   } catch {
     return null;
   }

@@ -109,15 +109,19 @@ export async function readTurns(sessionId: string): Promise<NormalizedTurn[]> {
   return turns;
 }
 
-export function countExistingTurns(sessionId: string): number {
+export async function countExistingTurns(sessionId: string): Promise<number> {
   const p = turnsPath(sessionId);
   if (!fs.existsSync(p)) return 0;
-  try {
-    const content = fs.readFileSync(p, 'utf8');
-    return content.split('\n').filter((l) => l.trim()).length;
-  } catch {
-    return 0;
+  let count = 0;
+  const rl = readline.createInterface({ input: fs.createReadStream(p), crlfDelay: Infinity });
+  for await (const line of rl) {
+    if (!line.trim()) continue;
+    try {
+      JSON.parse(line);
+      count++;
+    } catch { /* skip corrupted lines */ }
   }
+  return count;
 }
 
 // ── Write ─────────────────────────────────────────────────────────────────────

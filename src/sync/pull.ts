@@ -63,13 +63,12 @@ export async function pull(cfg: Config, db: Database.Database): Promise<number> 
           const remoteStat = fs.statSync(remoteAbs);
           const localStat = statOrNull(destPath);
 
-          if (!fileChanged(remoteStat, localStat)) {
-            // hash check for small files
-            if (localStat) {
-              const rh = hashFile(remoteAbs);
-              const lh = hashFile(destPath);
-              if (rh && lh && rh === lh) continue;
-            }
+          if (localStat && !fileChanged(remoteStat, localStat)) continue;
+
+          if (localStat) {
+            const rh = hashFile(remoteAbs);
+            const lh = hashFile(destPath);
+            if (rh && lh && rh === lh) continue;
           }
 
           await atomicCopy(remoteAbs, destPath);

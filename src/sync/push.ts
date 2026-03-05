@@ -64,11 +64,15 @@ export async function push(cfg: Config, db: Database.Database): Promise<number> 
           Math.abs(existing.mtime_ms - stat.mtimeMs) < 1000;
 
         if (quickUnchanged) {
-          // verify with hash for files < 5MB — but only skip if dest already exists in iCloud
+          // verify with hash for files < 5MB — skip if hash matches; for DB files skip
+          // regardless of destPath existence since they are pushed to .snapshots/ only
           const newHash = hashFile(absPath);
           if (newHash && existing.hash === newHash) {
+            const isDb =
+              (entry.name === 'cursor' && isCursorDbFile(absPath)) ||
+              isOpencodeDbFile(absPath, entry.name);
             const destPath = path.join(destBase, relPath);
-            if (fs.existsSync(destPath)) continue;
+            if (isDb || fs.existsSync(destPath)) continue;
           }
         }
 

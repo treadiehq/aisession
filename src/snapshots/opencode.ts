@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { snapshotDir } from '../paths.js';
+import { snapshotDir, SNAPSHOTS_DIR } from '../paths.js';
 import { getLogger } from '../logger.js';
 import { atomicCopy } from '../sync/copy.js';
 import { isProcessRunning, isFileLocked } from '../platform/process.js';
@@ -25,6 +25,15 @@ export async function snapshotOpencodeDb(
 
     const destPath = path.join(dir, path.basename(absPath));
     await atomicCopy(absPath, destPath);
+
+    // Copy WAL and SHM sibling files to prevent SQLite corruption on restore
+    for (const suffix of ['-wal', '-shm']) {
+      const sibling = absPath + suffix;
+      if (fs.existsSync(sibling)) {
+        await atomicCopy(sibling, destPath + suffix);
+      }
+    }
+
     log.info({ source, absPath, snapshotId }, 'Created opencode snapshot');
     return { snapshotId, snapshotPath: destPath, source };
   } catch (err) {
@@ -39,7 +48,11 @@ export async function restoreOpencodeSnapshot(
   source = 'opencode',
 ): Promise<void> {
   const log = getLogger();
-  const dir = snapshotDir(source, snapshotId);
+  const sourceDir = path.join(SNAPSHOTS_DIR, source);
+  const dir = path.resolve(snapshotDir(source, snapshotId));
+  if (!dir.startsWith(path.resolve(sourceDir) + path.sep)) {
+    throw new Error(`Invalid snapshot ID: ${snapshotId}`);
+  }
   if (!fs.existsSync(dir)) {
     throw new Error(`Snapshot not found: ${snapshotId}`);
   }

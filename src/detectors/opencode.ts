@@ -37,7 +37,7 @@ export function detectOpencode(
   else if (ext === '.log') kind = 'opencode_log';
   else kind = 'opencode_db'; // .sqlite/.db
 
-  const id = createHash('sha256').update('opencode:' + absPath).digest('hex').slice(0, 20);
+  const id = createHash('sha256').update('opencode:' + relPath).digest('hex').slice(0, 20);
   const project_hint = extractProjectHint(relPath);
 
   return [
