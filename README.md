@@ -1,236 +1,69 @@
-# AI Session Sync (`ss`)
+# AI Session
 
-**Multi-device continuity for Claude Code, OpenAI Codex CLI, OpenCode, and Cursor.**
+**Pick up any AI coding session on any machine, instantly.**
 
-`ss` mirrors local AI session stores through a provider-backed sync folder (iCloud, Dropbox, Google Drive, OneDrive, or any custom folder) so you can pick up where you left off on any machine — macOS, Windows, or Linux. No cloud API integrations, no web UI, no magic.
+You're deep in a Claude or Codex session on your laptop. You sit down at your desktop. You want to continue, same context, same files, same momentum.
 
----
-
-## What it syncs
-
-| Tool | macOS | Windows | Linux |
-|------|-------|---------|-------|
-| Claude Code | `~/.claude` | `%UserProfile%\.claude` | `~/.claude` |
-| OpenAI Codex CLI | `~/.codex` | `%UserProfile%\.codex` | `~/.codex` |
-| OpenCode | `~/.opencode` | `%UserProfile%\.opencode` | `~/.opencode` |
-| Cursor | `~/Library/.../workspaceStorage` | `%AppData%\Cursor\...` | `~/.config/Cursor/...` |
-| `~/.openai` | **Excluded by default** (credentials) | | |
-
-Paths are auto-detected on first run — no manual config required.
+That's what `aisession` does.
 
 ---
 
-## Prerequisites
+## What it does
 
-- **Node.js ≥ 18**
-- A sync provider folder on each machine:
-  - **macOS**: iCloud Drive, Dropbox, Google Drive, or OneDrive (auto-detected)
-  - **Windows**: OneDrive, Dropbox, or Google Drive (auto-detected)
-  - **Linux**: Dropbox or any mounted sync folder (Syncthing, rclone, etc.)
+- **Syncs** your local AI session files across machines (Claude, Codex, Cursor, OpenCode)
+- **Generates a handoff prompt** you can paste into any LLM to resume exactly where you left off
+- **Works with the folder you already have** like iCloud, Dropbox, Google Drive, OneDrive, or any custom folder
+- **Runs in the background**, you don't think about it
+
+No accounts. No cloud APIs. No servers. Just files.
 
 ---
 
 ## Install
 
 ```bash
-npm install -g aisession # or npx aisession setup
+npm install -g aisession
 ```
 
-This installs `ss` globally via `npm link`.
+Requires Node.js 18+.
 
 ---
 
-## Recommended first-time setup
-
-### 1. Choose your sync provider
+## Get started
 
 ```bash
-ss setup
+ss setup        # choose your sync provider (iCloud, Dropbox, etc.)
+ss init         # initialize on this machine
+ss daemon:start # start syncing in the background
 ```
 
-This interactive wizard:
-- Detects your OS
-- Shows available providers (iCloud / Dropbox / Google Drive / OneDrive / Custom)
-- Auto-detects provider folder paths
-- Creates `SessionSync/` inside the chosen folder
-- Auto-fills source paths from platform detection
-
-Non-interactive mode for scripts:
+On your other machine:
 
 ```bash
-ss setup --non-interactive --provider dropbox
-ss setup --non-interactive --provider custom --path /mnt/shared/sync
-```
-
-### 2. Initialize
-
-```bash
-ss init         # creates ~/.sessionsync/config.json + index DB
-```
-
-### 3. Start syncing
-
-```bash
-ss daemon:start
-```
-
-### On another machine
-
-```bash
-ss setup        # choose the same provider
+ss setup        # same provider
 ss init
 ss daemon:start
 ```
 
-Both machines now continuously push to and pull from the shared folder.
+That's it. Both machines are now in sync.
 
 ---
 
-## Provider selection
+## The handoff
 
-`ss` treats the sync transport as **just a local folder** — whatever keeps that folder in sync across machines is up to you. The folder layout is:
-
-```
-<syncRoot>/
-  machines/<machineId>/<source>/<relPath>
-  locks/<source>/<projectKey>.lock.json
-```
-
-### macOS
-
-| Provider | Auto-detected path |
-|----------|--------------------|
-| iCloud | `~/Library/Mobile Documents/com~apple~CloudDocs` |
-| Dropbox | `~/Dropbox` or `~/Library/CloudStorage/Dropbox` |
-| Google Drive | `~/Google Drive` or `~/Library/CloudStorage/GoogleDrive-*` |
-| OneDrive | `~/OneDrive` or `~/Library/CloudStorage/OneDrive-*` |
-
-### Windows
-
-| Provider | Auto-detected path |
-|----------|--------------------|
-| OneDrive | `%UserProfile%\OneDrive` |
-| Dropbox | `%UserProfile%\Dropbox` |
-| Google Drive | `%UserProfile%\Google Drive` or `%UserProfile%\My Drive` |
-| iCloud | `%UserProfile%\iCloudDrive` (if installed) |
-
-### Linux
-
-Native cloud sync clients are uncommon on Linux. Recommended options:
-
-- **Dropbox** (`~/Dropbox`) — install the Dropbox daemon
-- **Any synced mount** (Syncthing, rclone, SSHFS, etc.) — use `custom` provider
-- **Syncthing**: `ss setup --non-interactive --provider custom --path ~/Sync`
-
-Switch provider at any time:
+This is the killer feature. When you switch machines:
 
 ```bash
-ss set-sync --provider dropbox
-ss set-sync --provider custom --path /mnt/gdrive
+ss sessions              # see your recent sessions
+ss handoff <sessionId>   # generate a continuation prompt
 ```
 
----
-
-## Usage
-
-### Core commands
-
-```bash
-ss setup             # Interactive provider selection + path auto-detection
-ss init              # Initialize config + DB
-ss config            # Print resolved config
-ss set-sync --provider <name>  # Switch sync provider
-ss status            # Show sync status (machineId, provider, last push/pull, counts)
-ss doctor            # Validate environment, config, and sync health
-ss push              # One-shot push to sync folder
-ss pull              # One-shot pull from sync folder
-ss watch             # Push on file changes (foreground)
-```
-
-### Daemon
-
-```bash
-ss daemon:start      # Start background daemon (watch + periodic pull + lock renewals)
-ss daemon:stop       # Stop daemon
-ss daemon:status     # Check daemon status
-```
-
-### Sessions
-
-```bash
-ss sessions          # List recent sessions (default: 20)
-ss sessions --limit 50
-
-ss resume <sessionId>           # Print resume block for LLM
-ss resume <sessionId> --turns 5 # Show only last 5 turns
-```
-
-### Locks
-
-Locks prevent two machines from pushing conflicting updates to the same project.
-
-```bash
-ss lock myproject --source claude    # Acquire lock
-ss unlock myproject --source claude  # Release lock
-```
-
-### Cursor / OpenCode restore
-
-Cursor and OpenCode DB files are **never pushed live** — only snapshots are synced.
-
-```bash
-ss cursor:restore <snapshotId> --to ~/Library/Application\ Support/Cursor/User/workspaceStorage/<hash>
-ss opencode:restore <snapshotId> --to ~/.opencode/sessions/mydb.sqlite
-```
-
-> Both commands refuse to proceed if the target app is still running.
-
-### Discover
-
-```bash
-ss discover all        # Show all detected source paths + sync providers
-ss discover opencode   # Scan for OpenCode session data and suggest config entry
-```
-
-### Validate environment
-
-```bash
-ss doctor
-```
-
-Checks:
-- OS + Node.js version
-- Config file validity
-- Sync provider + sync root (exists? writable?)
-- Source paths (readable?)
-- Lock/snapshot folder writability
-- Warnings for large DB files or `~/.openai` in config
-
-### Session Handoff
-
-Generate a compact continuation prompt and paste it into any LLM to instantly resume a session on another machine or tool — no API required, fully offline.
-
-```bash
-ss handoff <sessionId>                    # Markdown output (default)
-ss handoff <sessionId> --format text      # Plain text
-ss handoff <sessionId> --format json      # JSON (for scripting)
-ss handoff <sessionId> --turns 10         # Use last 10 turns (default: 6)
-ss handoff <sessionId> --include-git false # Skip git status
-```
-
-Example output:
+You get something like this, ready to paste into Claude, Codex, or Cursor:
 
 ```
-# SESSION HANDOFF
-
-**Project:** billing-api
-**Source:** codex
-**Updated:** 3/4/2026, 7:05:00 PM
-
 ## WORK COMPLETED
 - Refactored billing service
 - Added retry logic
-- Edited billing.ts
 
 ## LAST USER PROMPT
 Add retry backoff logic
@@ -238,141 +71,34 @@ Add retry backoff logic
 ## LAST ASSISTANT RESPONSE
 Here is an exponential backoff implementation...
 
-## FILES MODIFIED
-- `billing.ts`
-- `payment.ts`
-
-## CURRENT GIT STATUS
-M billing.ts
-M payment.ts
-
 ## NEXT SUGGESTED TASK
 Continue implementing: "Add retry backoff logic"
-
----
-*Paste this block into Claude, Codex, Cursor, or another LLM to continue the session.*
 ```
 
-**Typical multi-machine workflow:**
-
-```
-Laptop (Machine A)                Desktop (Machine B)
-──────────────────                ───────────────────
-ss daemon:start                   ss pull
-  (coding with Claude...)         ss sessions
-                                  ss handoff <id>
-                                    → paste into Claude/Cursor/Codex
-```
-
-The handoff block is also available via the local API:
-
-```bash
-curl http://localhost:3900/sessions/<id>/handoff
-```
+Paste it in. Continue immediately.
 
 ---
 
-## How it works
+## Supported tools
 
-### Push / pull
+| Tool | Synced |
+|------|--------|
+| Claude Code | ✅ |
+| OpenAI Codex CLI | ✅ |
+| Cursor | ✅ (snapshots) |
+| OpenCode | ✅ |
 
-1. `ss push` walks all `include` paths, hashes changed files, and copies them to  
-   `~/Library/Mobile Documents/com~apple~CloudDocs/SessionSync/machines/<machineId>/<source>/`
-2. `ss pull` scans all other `machines/` folders in the iCloud root and copies them to  
-   `~/.sessionsync/cache/machines/<otherMachineId>/`
-3. Change detection: size+mtime quick check, then sha256 for files < 5 MB.
-4. All file copies are atomic (write to `.sstmp` → rename).
-
-### Safety and continuity
-
-- **Cursor / OpenCode DB files**: snapshotted before any push.  
-  Snapshots live at `~/.sessionsync/snapshots/<source>/<snapshotId>/`.
-- **Locks**: written to `<syncRoot>/locks/<source>/<projectKey>.lock.json`.  
-  Lock TTL: 10 minutes; renewed every 60 s by the daemon.
-- **Redact patterns**: files matching `*token*`, `*auth*`, `*credential*`, `*.pem`, `*.key`, etc. are **never synced**.
+Works on macOS, Windows, and Linux.
 
 ---
 
-## Config
+## More
 
-Default config at `~/.sessionsync/config.json`:
-
-```json
-{
-  "syncRoot": "~/Library/Mobile Documents/com~apple~CloudDocs/SessionSync",
-  "machineId": "<stable-id>",
-  "include": [
-    { "name": "claude",    "path": "~/.claude" },
-    { "name": "codex",     "path": "~/.codex" },
-    { "name": "opencode",  "path": "~/.opencode" },
-    { "name": "cursor",    "path": "~/Library/Application Support/Cursor/User/workspaceStorage" }
-  ],
-  "exclude": ["**/Cache/**", "**/*.lock", "**/*.tmp", "**/*.temp", "**/*.swp", "**/node_modules/**"],
-  "redactFileNamePatterns": ["*token*", "*auth*", "*credential*", "*api_key*", "*.pem", "*.key"],
-  "pollIntervalMs": 1500,
-  "pullIntervalMs": 30000,
-  "lockTtlMs": 600000
-}
-```
-
-Edit this file directly to customize paths or add new sources.
+- [Detailed docs](DETAILS.md) — all commands, config, security, architecture
+- [GitHub](https://github.com/treadiehq/aisession)
+- [npm](https://www.npmjs.com/package/aisession)
 
 ---
-
-## Security
-
-- `~/.openai` is excluded by default. The daemon and push command will error if you add it without `--i-know-what-im-doing`.
-- Files matching `redactFileNamePatterns` are silently skipped at push time.
-- Cursor and OpenCode DB files are never pushed live — only read-only snapshots.
-
----
-
-## Local state
-
-| Path | Purpose |
-|------|---------|
-| `~/.sessionsync/config.json` | User config |
-| `~/.sessionsync/index.db` | SQLite index (sources, files, sessions) |
-| `~/.sessionsync/logs/ss.log` | JSON log (pino) |
-| `~/.sessionsync/cache/machines/` | Pulled remote sessions |
-| `~/.sessionsync/snapshots/` | Local DB snapshots |
-| `~/.sessionsync/daemon.pid` | Daemon PID |
-
----
-
-## Development
-
-```bash
-npm run dev -- <command>   # run via tsx (no build needed)
-npm run build              # compile to dist/
-npm test                   # run vitest
-```
-
----
-
-## Typical multi-machine workflow
-
-```
-Machine A                          iCloud Drive                  Machine B
-─────────                          ────────────                  ─────────
-ss daemon:start          →→→  machines/machineA/claude/…
-                                   machines/machineA/codex/…
-                               ←←← machines/machineB/…          ss daemon:start
-
-ss sessions                                                      ss pull
-ss resume <id>                                                   ss sessions
-                                                                 ss resume <id>
-```
-
----
-
-## Limitations
-
-- macOS only (iCloud Drive path is macOS-specific).
-- Cursor workspace context (active files, AI chat history) is approximate — Cursor stores state in SQLite; `ss` snapshots it but cannot extract semantic context.
-- Sync is eventually consistent; there is no real-time streaming.
-- iCloud Drive sync speed is not controlled by `ss`.
-
 
 ## License
 
