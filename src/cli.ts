@@ -53,7 +53,7 @@ const program = new Command();
 program
   .name('ais')
   .description('AI Session Sync – multi-device continuity for Claude, Codex, Cursor, OpenCode')
-  .version('0.1.3')
+  .version('0.1.4')
   .option('--i-know-what-im-doing', 'Suppress the ~/.openai safety warning');
 
 // ── setup ─────────────────────────────────────────────────────────────────────
@@ -516,11 +516,17 @@ program
 
 // ── export ────────────────────────────────────────────────────────────────────
 program
-  .command('export <sessionId>')
-  .description('Export a session to a portable directory')
+  .command('export [sessionId]')
+  .description('Export a session to a portable directory. Omit sessionId to auto-discover and export the most recent session.')
   .option('--out <dir>', 'Output directory (default: ./session-export-<id>)')
   .action(async (sessionId, opts) => {
-    await exportSession(sessionId, opts.out ? path.resolve(opts.out) : undefined);
+    const outDir = opts.out ? path.resolve(opts.out) : undefined;
+    if (!sessionId) {
+      const { quickExport } = await import('./export/quickExport.js');
+      await quickExport(outDir);
+    } else {
+      await exportSession(sessionId, outDir);
+    }
   });
 
 // ── share ─────────────────────────────────────────────────────────────────────
